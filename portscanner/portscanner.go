@@ -1,7 +1,7 @@
 package portscanner
 
 /*
-	Author: Mellowz, Version 1.1
+	Author: Mellowz, Version 1.21
 	Creation Date: Nov 16, 2026
 	This is a port scanner class for implementing a threaded port scanner using goroutines-
 	and the standard go net library.
@@ -11,19 +11,20 @@ package portscanner
 */
 
 import (
-	"fmt"
 	"net"
+	"strconv"
+	"sync"
 	"time"
 )
 
-// Struct for port scanner object
+// Struct of port scanner
 type PortScanner struct {
 	Host    string
 	Timeout time.Duration
 	Workers int
 }
 
-// This function initializes a new port scanner object with the given parameters
+// This function creates a new port scanner with passed in parameters
 func NewScanner(host string, timeout time.Duration, workers int) *PortScanner {
 	return &PortScanner{
 		Host:    host,
@@ -32,11 +33,11 @@ func NewScanner(host string, timeout time.Duration, workers int) *PortScanner {
 	}
 }
 
-// Function to scan a single port via TCP
+// Scans a single port and returns boolean value
 func (ps *PortScanner) ScanPort(port int) bool {
-	ipAddr := fmt.Sprintf("%s:%d", ps.Host, port)
+	ipAddr := net.JoinHostPort(ps.Host, strconv.Itoa(port)) // Itoa to handle IPv6 & IPv4
 
-	// Attempt to connect by dialing
+	// Attempt to connect by dialing via TCP
 	conn, err := net.DialTimeout("tcp", ipAddr, ps.Timeout)
 	if err != nil {
 		return false
@@ -47,8 +48,38 @@ func (ps *PortScanner) ScanPort(port int) bool {
 
 }
 
-// TO-DO add scan range
+// This function scans a range of ports using goroutines
+func (ps *PortScanner) ScanPortRange(startPort, endPort int) <-chan int {
+	ports := make(chan int, ps.Workers) // Channel size is set to the # of workers so each worker has a port
+	results := make(chan int)
+	var wg sync.WaitGroup // Wait group tracks active workers in sync
 
-// TO-DO add multiple scan types
+	// Starts the workers
+	for i := 0; i < ps.Workers; i++ {
+		wg.Go(func() {
+			for p := range ports {
+				if ps.ScanPort(p) {
+					results <- p // Send the port into results if it is open
+				}
+			}
+		})
+	}
+
+	// Loads ports into channel
+	go func() {
+		for p := startPort; p <= endPort; p++ {
+			ports <- p
+		}
+		close(ports)
+	}()
+
+	// Spins up closing function to wait for wg to finish and then closes results channel
+	go func() {
+		wg.Wait()
+		close(results)
+	}()
+
+	return results
+}
 
 // TO-DO add version/software detection
