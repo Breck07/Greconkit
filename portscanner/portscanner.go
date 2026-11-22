@@ -3,7 +3,7 @@ package portscanner
 /*
 	Author: Mellowz, Version 1.21
 	Creation Date: Nov 16, 2026
-	This is a port scanner class for implementing a threaded port scanner using goroutines-
+	This file implements a threaded port scanner using goroutines-
 	and the standard go net library.
 	Created with - GO VERSION: 1.27.4
 
