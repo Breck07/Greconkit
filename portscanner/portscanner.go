@@ -1,7 +1,7 @@
 package portscanner
 
 /*
-	Author: Mellowz, Version 1.21
+	Author: Breck Letulle, Version 1.21
 	Creation Date: Nov 16, 2026
 	This file implements a threaded port scanner - 
 	using goroutines and the standard go net library.
