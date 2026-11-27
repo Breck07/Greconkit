@@ -3,11 +3,12 @@ package portscanner
 /*
 	Author: Mellowz, Version 1.21
 	Creation Date: Nov 16, 2026
-	This file implements a threaded port scanner using goroutines-
-	and the standard go net library.
+	This file implements a threaded port scanner - 
+	using goroutines and the standard go net library.
 	Created with - GO VERSION: 1.27.4
 
-	*WARNING* This port scanner is to be used only on networks with given permission and educational purposes!
+	*WARNING* This port scanner is to be used only on networks - 
+	with given permission and educational purposes!
 */
 
 import (
